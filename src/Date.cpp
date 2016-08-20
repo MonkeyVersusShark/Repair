@@ -165,22 +165,22 @@ std::string Date::dateToString(Date t_date) {
   std::stringstream ss;
   ss << t_date.m_year;
   date_str += ss.str() + "-";
-  ss.clear();
+  ss.str("");
   ss << t_date.m_month;
   if (t_date.m_month < 10)
     date_str += "0";
   date_str += ss.str() + "-";
-  ss.clear();
+  ss.str("");
   ss << t_date.m_day;
   if (t_date.m_day < 10)
     date_str += "0";
   date_str += ss.str() + "/";
-  ss.clear();
+  ss.str("");
   ss << t_date.m_hour;
   if (t_date.m_hour < 10)
     date_str += "0";
   date_str += ss.str() + ":";
-  ss.clear();
+  ss.str("");
   ss << t_date.m_minute;
   if (t_date.m_minute < 10)
     date_str += "0";
