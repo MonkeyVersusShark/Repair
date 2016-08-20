@@ -32,10 +32,10 @@ bool Storage::readFromFile(void) {
   for (int i = 0; !user_file.eof(); i++) {
     std::getline(user_file, stringMap[i], '\n');
   }
-  for (auto iterator = stringMap.begin(); iterator != (--stringMap.end());
+  for (auto iterator = stringMap.begin(); iterator != stringMap.end();
        iterator++) {
-           if (iterator == stringMap.begin())
-                continue;
+    if (iterator == stringMap.begin() || iterator == (--stringMap.end()))
+      continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string username = (iterator->second).substr(1, first_comma - 2);
     std::size_t second_comma =
@@ -50,7 +50,7 @@ bool Storage::readFromFile(void) {
             .substr(second_comma + 2, third_comma - second_comma - 3);
     string phone = (iterator->second)
                        .substr(third_comma + 2,
-                               (iterator->second).length() - third_comma - 4);
+                               (iterator->second).length() - third_comma - 3);
     m_userList.push_back(User(username, password, email, phone));
   }
   user_file.close();
@@ -63,10 +63,10 @@ bool Storage::readFromFile(void) {
   for (int i = 0; !meeting_file.eof(); i++) {
     std::getline(meeting_file, stringMap[i], '\n');
   }
-  for (auto iterator = stringMap.begin(); iterator != (--stringMap.end());
+  for (auto iterator = stringMap.begin(); iterator != stringMap.end();
        iterator++) {
-           if (iterator == stringMap.begin())
-                continue;
+    if (iterator == stringMap.begin() || iterator == (--stringMap.end()))
+      continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string sponsor = (iterator->second).substr(1, first_comma - 2);
     std::size_t second_comma =
@@ -86,7 +86,7 @@ bool Storage::readFromFile(void) {
             .substr(third_comma + 2, fourth_comma - third_comma - 3);
     string title = (iterator->second)
                        .substr(fourth_comma + 2,
-                               (iterator->second).length() - fourth_comma - 4);
+                               (iterator->second).length() - fourth_comma - 3);
     std::vector<string> vec_participators;
     std::size_t found = participators.find("&");
     if (found == std::string::npos) {
