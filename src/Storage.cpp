@@ -25,15 +25,17 @@ Storage::Storage() { readFromFile(); }
 */
 bool Storage::readFromFile(void) {
   std::ifstream user_file;
-  user_file.open("users.csv");
+  user_file.open("../data/users.csv");
   if (!user_file)
     return false;
   map<int, string> stringMap;
   for (int i = 0; !user_file.eof(); i++) {
     std::getline(user_file, stringMap[i], '\n');
   }
-  for (auto iterator = stringMap.begin(); iterator != stringMap.end();
+  for (auto iterator = stringMap.begin(); iterator != (--stringMap.end());
        iterator++) {
+           if (iterator == stringMap.begin())
+                continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string username = (iterator->second).substr(1, first_comma - 2);
     std::size_t second_comma =
@@ -55,14 +57,16 @@ bool Storage::readFromFile(void) {
   stringMap.clear();
 
   std::ifstream meeting_file;
-  meeting_file.open("meeting.csv");
+  meeting_file.open("../data/meeting.csv");
   if (!meeting_file)
     return false;
   for (int i = 0; !meeting_file.eof(); i++) {
     std::getline(meeting_file, stringMap[i], '\n');
   }
-  for (auto iterator = stringMap.begin(); iterator != stringMap.end();
+  for (auto iterator = stringMap.begin(); iterator != (--stringMap.end());
        iterator++) {
+           if (iterator == stringMap.begin())
+                continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string sponsor = (iterator->second).substr(1, first_comma - 2);
     std::size_t second_comma =
@@ -113,7 +117,7 @@ bool Storage::readFromFile(void) {
 */
 bool Storage::writeToFile(void) {
   std::ofstream user_file;
-  user_file.open("users.csv");
+  user_file.open("../data/users.csv");
   if (!user_file)
     return false;
   user_file << "\"name\",\"password\",\"email\",\"phone\"\n";
@@ -125,7 +129,7 @@ bool Storage::writeToFile(void) {
   }
   user_file.close();
   std::ofstream meeting_file;
-  meeting_file.open("meetings.csv");
+  meeting_file.open("../data/meetings.csv");
   if (!meeting_file)
     return false;
   meeting_file
@@ -142,6 +146,7 @@ bool Storage::writeToFile(void) {
                  << "\"" << Date::dateToString(meeting.getEndDate()) << "\","
                  << "\"" << meeting.getTitle() << "\"\n";
   }
+  return true;
 }
 
 /**
@@ -149,9 +154,9 @@ bool Storage::writeToFile(void) {
 * @return the pointer of the instance
 */
 std::shared_ptr<Storage> Storage::getInstance(void) {
-  if (m_instance)
-    return m_instance;
-  m_instance = std::shared_ptr<Storage>(new Storage);
+  if (m_instance == nullptr)
+    m_instance = std::shared_ptr<Storage>(new Storage);
+  return m_instance;
 }
 
 /**
@@ -192,7 +197,7 @@ Storage::queryUser(std::function<bool(const User &)> filter) const {
 int Storage::updateUser(std::function<bool(const User &)> filter,
                         std::function<void(User &)> switcher) {
   int count = 0;
-  for (auto user : m_userList) {
+  for (auto &user : m_userList) {
     if (filter(user)) {
       switcher(user);
       count++;
@@ -211,7 +216,7 @@ int Storage::deleteUser(std::function<bool(const User &)> filter) {
   auto iterator = m_userList.begin();
   while (iterator != m_userList.end()) {
     if (filter(*iterator)) {
-      m_userList.erase(iterator);
+      iterator = m_userList.erase(iterator);
       count++;
     } else {
       iterator++;
@@ -253,7 +258,7 @@ std::list<Meeting> Storage::queryMeeting(
 int Storage::updateMeeting(std::function<bool(const Meeting &meeting)> filter,
                            std::function<void(Meeting &)> switcher) {
   int count = 0;
-  for (auto meeting : m_meetingList) {
+  for (auto &meeting : m_meetingList) {
     if (filter(meeting)) {
       switcher(meeting);
       count++;
@@ -272,7 +277,7 @@ int Storage::deleteMeeting(std::function<bool(const Meeting &meeting)> filter) {
   auto iterator = m_meetingList.begin();
   while (iterator != m_meetingList.end()) {
     if (filter(*iterator)) {
-      m_meetingList.erase(iterator);
+      iterator = m_meetingList.erase(iterator);
       count++;
     } else {
       iterator++;
