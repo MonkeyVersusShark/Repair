@@ -10,7 +10,7 @@
 /**
 * @brief default constructor
 */
-Date::Date() {}
+Date::Date() : m_year(0), m_month(0), m_day(0), m_hour(0), m_minute(0) {}
 
 /**
 * @brief constructor with arguments
