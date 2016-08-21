@@ -10,7 +10,13 @@
 /**
 * @brief default constructor
 */
-Date::Date() : m_year(0), m_month(0), m_day(0), m_hour(0), m_minute(0) {}
+Date::Date() {
+  m_year = 0;
+  m_month = 0;
+  m_day = 0;
+  m_hour = 0;
+  m_minute = 0;
+}
 
 /**
 * @brief constructor with arguments
@@ -23,19 +29,8 @@ Date::Date(int t_year, int t_month, int t_day, int t_hour, int t_minute)
 * @brief constructor with a string
 */
 Date::Date(std::string dateString) {
-  char *cstring = new char[dateString.length() + 1];
-  strcpy(cstring, dateString.c_str());
-  char *p = strtok(cstring, "-/:");
-  this->m_year = atoi(p);
-  p = strtok(NULL, "-/:");
-  this->m_month = atoi(p);
-  p = strtok(NULL, "-/:");
-  this->m_day = atoi(p);
-  p = strtok(NULL, "-/:");
-  this->m_hour = atoi(p);
-  p = strtok(NULL, "-/:");
-  this->m_minute = atoi(p);
-  delete[] cstring;
+  Date date = stringToDate(dateString);
+  (*this) = date;
 }
 /**
 * @brief return the year of a Date

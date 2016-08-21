@@ -32,14 +32,14 @@ void AgendaUI::OperationLoop(void) {
 }
 
 /**
- * constructor
- */
+* constructor
+*/
 void AgendaUI::startAgenda(void) { m_agendaService.startAgenda(); }
 
 /**
- * catch user's operation
- * @return the operation
- */
+* catch user's operation
+* @return the operation
+*/
 std::string AgendaUI::getOperation() {
   std::string operation;
   cin >> operation;
@@ -47,9 +47,9 @@ std::string AgendaUI::getOperation() {
 }
 
 /**
- * execute the operation
- * @return if the operationloop continue
- */
+* execute the operation
+* @return if the operationloop continue
+*/
 bool AgendaUI::executeOperation(std::string t_operation) {
   if (t_operation == "o") {
     userLogOut();
@@ -84,14 +84,16 @@ bool AgendaUI::executeOperation(std::string t_operation) {
   } else if (t_operation == "da") {
     deleteAllMeetings();
     return true;
+  } else {
+    return false;
   }
-  return false;
 }
 
 /**
- * user Login
- */
+* user Login
+*/
 void AgendaUI::userLogIn(void) {
+  cout << endl;
   cout << "[log in] [user name] [password]" << endl;
   cout << "[log in] ";
   std::string userName, userPassword;
@@ -102,6 +104,8 @@ void AgendaUI::userLogIn(void) {
     cout << "[error] log in fail!" << endl;
     OperationLoop();
   } else {
+    cout << "Succeed!" << endl;
+    cout << endl;
     cout << "o   - log out Agenda\n";
     cout << "dc  - delete Agenda account\n";
     cout << "lu  - list all Agenda user\n";
@@ -116,16 +120,37 @@ void AgendaUI::userLogIn(void) {
     cout << "-------------------------------------------------" << endl;
     cout << "Agenda@" << m_userName << " : # ";
     std::string operation = getOperation();
-    if (!executeOperation(operation)) {
+    if (operation == "o" || operation == "dc" || operation == "lu" ||
+        operation == "cm" || operation == "la" || operation == "las" ||
+        operation == "lap" || operation == "qm" || operation == "qt" ||
+        operation == "dm" || operation == "da") {
+      executeOperation(operation);
+    } else {
       cout << "can't find the operating command" << endl;
-      return;
+      cout << "Agenda@" << m_userName << " : # ";
+      std::string operation = getOperation();
+      bool flag = false;
+      while (!executeOperation(operation)) {
+        cout << "can't find the operating command" << endl;
+        cout << "Agenda@" << m_userName << " : # ";
+        operation = getOperation();
+        if (operation == "o" || operation == "dc" || operation == "lu" ||
+            operation == "cm" || operation == "la" || operation == "las" ||
+            operation == "lap" || operation == "qm" || operation == "qt" ||
+            operation == "dm" || operation == "da") {
+          flag = true;
+          break;
+        }
+      }
+      if (flag)
+        executeOperation(operation);
     }
   }
 }
 
 /**
- * user regist
- */
+* user regist
+*/
 void AgendaUI::userRegister(void) {
   cout << endl;
   cout << "[register] [user name] [password] [email] [phone]" << endl
@@ -142,29 +167,33 @@ void AgendaUI::userRegister(void) {
 }
 
 /**
- * quit the Agenda
- */
+* quit the Agenda
+*/
 void AgendaUI::quitAgenda(void) { m_agendaService.quitAgenda(); }
 
 /**
- * user logout
- */
+* user logout
+*/
 void AgendaUI::userLogOut(void) {
   cout << endl;
   OperationLoop();
 }
 
 /**
- * delete a user from storage
- */
+* delete a user from storage
+*/
 void AgendaUI::deleteUser(void) {
-  m_agendaService.deleteUser(m_userName, m_userPassword);
-  cout << endl << "[delete agenda account] succeed!" << endl;
+  if (m_agendaService.deleteUser(m_userName, m_userPassword)) {
+    cout << endl << "[delete agenda account] succeed!" << endl;
+  } else {
+    cout << endl << "[error] delete user fail" << endl;
+  }
+  OperationLoop();
 }
 
 /**
- * list all users from storage
- */
+* list all users from storage
+*/
 void AgendaUI::listAllUsers(void) {
   cout << endl << "[list all users]" << endl << endl;
   std::list<User> lu = m_agendaService.listAllUsers();
@@ -175,11 +204,23 @@ void AgendaUI::listAllUsers(void) {
     cout << std::setw(16) << user.getName() << std::setw(16) << user.getEmail()
          << std::setw(16) << user.getPhone() << endl;
   }
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * user create a meeting with someone else
- */
+* user create a meeting with someone else
+*/
 void AgendaUI::createMeeting(void) {
   cout << endl;
   int num;
@@ -204,43 +245,91 @@ void AgendaUI::createMeeting(void) {
   } else {
     cout << "[creating meeting] error!" << endl;
   }
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * list all meetings from storage
- */
+* list all meetings from storage
+*/
 void AgendaUI::listAllMeetings(void) {
   cout << endl;
   cout << "[list all meetings]" << endl << endl;
   std::list<Meeting> meeting_list = m_agendaService.listAllMeetings(m_userName);
   printMeetings(meeting_list);
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * list all meetings that this user sponsored
- */
+* list all meetings that this user sponsored
+*/
 void AgendaUI::listAllSponsorMeetings(void) {
   cout << endl;
   cout << "[list all sponsor meetings]" << endl << endl;
   std::list<Meeting> meeting_list =
       m_agendaService.listAllSponsorMeetings(m_userName);
   printMeetings(meeting_list);
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * list all meetings that this user take part in
- */
+* list all meetings that this user take part in
+*/
 void AgendaUI::listAllParticipateMeetings(void) {
   cout << endl;
   cout << "[list all participator meetings]" << endl << endl;
   std::list<Meeting> meeting_list =
       m_agendaService.listAllParticipateMeetings(m_userName);
   printMeetings(meeting_list);
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * search meetings by title from storage
- */
+* search meetings by title from storage
+*/
 void AgendaUI::queryMeetingByTitle(void) {
   cout << endl;
   cout << "[query meetings] [title]:" << endl << "[query meetings] ";
@@ -249,14 +338,26 @@ void AgendaUI::queryMeetingByTitle(void) {
   std::list<Meeting> meeting_list =
       m_agendaService.meetingQuery(m_userName, title);
   printMeetings(meeting_list);
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * search meetings by timeinterval from storage
- */
+* search meetings by timeinterval from storage
+*/
 void AgendaUI::queryMeetingByTimeInterval(void) {
   cout << endl;
-  cout << "[query meetings] [start time(yyyy-mm-dd/hh:mm)]"
+  cout << "[query meetings] [start time(yyyy-mm-dd/hh:mm)] "
        << "[end time(yyyy-mm-dd/hh:mm)]" << endl
        << "[query meetings] ";
   std::string startDate, endDate;
@@ -264,11 +365,23 @@ void AgendaUI::queryMeetingByTimeInterval(void) {
   std::list<Meeting> meeting_list =
       m_agendaService.meetingQuery(m_userName, startDate, endDate);
   printMeetings(meeting_list);
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * delete meetings by title from storage
- */
+* delete meetings by title from storage
+*/
 void AgendaUI::deleteMeetingByTitle(void) {
   cout << endl;
   cout << "[delete meeting] [title]" << endl << "[delete meeting] ";
@@ -279,30 +392,54 @@ void AgendaUI::deleteMeetingByTitle(void) {
   } else {
     cout << endl << "[error] delete meeting fail!";
   }
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * delete all meetings that this user sponsored
- */
+* delete all meetings that this user sponsored
+*/
 void AgendaUI::deleteAllMeetings(void) {
   cout << endl;
   m_agendaService.deleteAllMeetings(m_userName);
   cout << "[delete all meetings] succeed!" << endl;
+  cout << endl;
+  cout << "Agenda@" << m_userName << " : # ";
+  std::string operation = getOperation();
+  while (operation != "o" && operation != "dc" && operation != "lu" &&
+         operation != "cm" && operation != "la" && operation != "las" &&
+         operation != "lap" && operation != "qm" && operation != "qt" &&
+         operation != "dm" && operation != "da") {
+    cout << "can't find the operating command" << endl;
+    cout << "Agenda@" << m_userName << " : # ";
+    operation = getOperation();
+  }
+  executeOperation(operation);
 }
 
 /**
- * show the meetings in the screen
- */
+* show the meetings in the screen
+*/
 void AgendaUI::printMeetings(std::list<Meeting> t_meetings) {
   cout.setf(std::ios::left);
-  cout << std::setw(18) << "title" << std::setw(18) << "sponsor"
+  cout << std::setw(10) << "title" << std::setw(10) << "sponsor"
        << std::setw(18) << "start time" << std::setw(18) << "end time"
        << std::setw(18) << "participator" << endl;
   for (auto meeting : t_meetings) {
     cout.setf(std::ios::left);
-    cout << std::setw(18) << meeting.getTitle() << std::setw(18)
-         << meeting.getSponsor() << std::setw(18)
-         << Date::dateToString(meeting.getStartDate()) << std::setw(18)
+    cout << std::setw(16) << meeting.getTitle() << std::setw(16)
+         << meeting.getSponsor() << std::setw(16)
+         << Date::dateToString(meeting.getStartDate()) << std::setw(16)
          << Date::dateToString(meeting.getEndDate());
     std::vector<std::string> vec_participator = meeting.getParticipator();
     for (auto iterator = vec_participator.begin();

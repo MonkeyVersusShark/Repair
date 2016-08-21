@@ -15,7 +15,7 @@ using std::string;
 
 std::shared_ptr<Storage> Storage::m_instance = nullptr;
 /**
-*  default constructor
+*   default constructor
 */
 Storage::Storage() {
   m_dirty = false;
@@ -28,7 +28,7 @@ Storage::Storage() {
 */
 bool Storage::readFromFile(void) {
   std::ifstream user_file;
-  user_file.open("../data/users.csv");
+  user_file.open(Path::userPath);
   if (!user_file)
     return false;
   map<int, string> stringMap;
@@ -37,7 +37,7 @@ bool Storage::readFromFile(void) {
   }
   for (auto iterator = stringMap.begin(); iterator != stringMap.end();
        iterator++) {
-    if (iterator == stringMap.begin() || iterator == (--stringMap.end()))
+    if (iterator == (--stringMap.end()))
       continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string username = (iterator->second).substr(1, first_comma - 2);
@@ -60,7 +60,7 @@ bool Storage::readFromFile(void) {
   stringMap.clear();
 
   std::ifstream meeting_file;
-  meeting_file.open("../data/meeting.csv");
+  meeting_file.open(Path::meetingPath);
   if (!meeting_file)
     return false;
   for (int i = 0; !meeting_file.eof(); i++) {
@@ -68,7 +68,7 @@ bool Storage::readFromFile(void) {
   }
   for (auto iterator = stringMap.begin(); iterator != stringMap.end();
        iterator++) {
-    if (iterator == stringMap.begin() || iterator == (--stringMap.end()))
+    if (iterator == (--stringMap.end()))
       continue;
     std::size_t first_comma = (iterator->second).find_first_of(",");
     string sponsor = (iterator->second).substr(1, first_comma - 2);
@@ -114,15 +114,15 @@ bool Storage::readFromFile(void) {
 }
 
 /**
- *
+*
 *   write file content from memory
 *   @return if success, true will be returned
 */
 bool Storage::writeToFile(void) {
-  std::ofstream user_file(Path::userPath);
+  std::ofstream user_file;
+  user_file.open(Path::userPath);
   if (!user_file)
     return false;
-  user_file << "\"name\",\"password\",\"email\",\"phone\"\n";
   for (auto user : m_userList) {
     user_file << "\"" << user.getName() << "\","
               << "\"" << user.getPassword() << "\","
@@ -130,11 +130,10 @@ bool Storage::writeToFile(void) {
               << "\"" << user.getPhone() << "\"\n";
   }
   user_file.close();
-  std::ofstream meeting_file(Path::meetingPath);
+  std::ofstream meeting_file;
+  meeting_file.open(Path::meetingPath);
   if (!meeting_file)
     return false;
-  meeting_file
-      << "\"sponsor\",\"participator\",\"start date\",\"end date\",\"title\"\n";
   for (auto meeting : m_meetingList) {
     meeting_file << "\"" << meeting.getSponsor() << "\",\"";
     std::vector<std::string> vec_participators = meeting.getParticipator();
@@ -157,15 +156,17 @@ bool Storage::writeToFile(void) {
 */
 std::shared_ptr<Storage> Storage::getInstance(void) {
   if (m_instance == nullptr)
-    ;
-  m_instance = std::shared_ptr<Storage>(new Storage);
+    m_instance = std::shared_ptr<Storage>(new Storage);
   return m_instance;
 }
 
 /**
 *   destructor
 */
-Storage::~Storage() { sync(); }
+Storage::~Storage() {
+  sync();
+  m_instance = std::shared_ptr<Storage>(nullptr);
+}
 
 // CRUD for User & Meeting
 // using C++11 Function Template and Lambda Expressions
