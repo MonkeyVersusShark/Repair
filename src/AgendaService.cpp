@@ -113,7 +113,7 @@ bool AgendaService::createMeeting(const std::string userName,
       }
     }
   }
-  if (count != list_all_user.size())
+  if (count != participator.size())
     return false;
   Date date1 = Date::stringToDate(startDate);
   Date date2 = Date::stringToDate(endDate);
