@@ -15,9 +15,12 @@ using std::string;
 
 std::shared_ptr<Storage> Storage::m_instance = nullptr;
 /**
-*   default constructor
+*  default constructor
 */
-Storage::Storage() { readFromFile(); }
+Storage::Storage() {
+  m_dirty = false;
+  readFromFile();
+}
 
 /**
 *   read file content into memory
@@ -111,13 +114,12 @@ bool Storage::readFromFile(void) {
 }
 
 /**
-*
+ *
 *   write file content from memory
 *   @return if success, true will be returned
 */
 bool Storage::writeToFile(void) {
-  std::ofstream user_file;
-  user_file.open("../data/users.csv");
+  std::ofstream user_file(Path::userPath);
   if (!user_file)
     return false;
   user_file << "\"name\",\"password\",\"email\",\"phone\"\n";
@@ -128,8 +130,7 @@ bool Storage::writeToFile(void) {
               << "\"" << user.getPhone() << "\"\n";
   }
   user_file.close();
-  std::ofstream meeting_file;
-  meeting_file.open("../data/meetings.csv");
+  std::ofstream meeting_file(Path::meetingPath);
   if (!meeting_file)
     return false;
   meeting_file
@@ -146,6 +147,7 @@ bool Storage::writeToFile(void) {
                  << "\"" << Date::dateToString(meeting.getEndDate()) << "\","
                  << "\"" << meeting.getTitle() << "\"\n";
   }
+  m_dirty = false;
   return true;
 }
 
@@ -155,14 +157,15 @@ bool Storage::writeToFile(void) {
 */
 std::shared_ptr<Storage> Storage::getInstance(void) {
   if (m_instance == nullptr)
-    m_instance = std::shared_ptr<Storage>(new Storage);
+    ;
+  m_instance = std::shared_ptr<Storage>(new Storage);
   return m_instance;
 }
 
 /**
 *   destructor
 */
-Storage::~Storage() {}
+Storage::~Storage() { sync(); }
 
 // CRUD for User & Meeting
 // using C++11 Function Template and Lambda Expressions
@@ -171,7 +174,10 @@ Storage::~Storage() {}
 * create a user
 * @param a user object
 */
-void Storage::createUser(const User &t_user) { m_userList.push_back(t_user); }
+void Storage::createUser(const User &t_user) {
+  m_userList.push_back(t_user);
+  m_dirty = true;
+}
 
 /**
 * query users
@@ -222,6 +228,7 @@ int Storage::deleteUser(std::function<bool(const User &)> filter) {
       iterator++;
     }
   }
+  m_dirty = true;
   return count;
 }
 
@@ -231,6 +238,7 @@ int Storage::deleteUser(std::function<bool(const User &)> filter) {
 */
 void Storage::createMeeting(const Meeting &t_meeting) {
   m_meetingList.push_back(t_meeting);
+  m_dirty = true;
 }
 
 /**
@@ -241,7 +249,7 @@ void Storage::createMeeting(const Meeting &t_meeting) {
 std::list<Meeting> Storage::queryMeeting(
     std::function<bool(const Meeting &meeting)> filter) const {
   std::list<Meeting> queriedMeetings;
-  for (auto meeting : m_meetingList) {
+  for (auto &meeting : m_meetingList) {
     if (filter(meeting)) {
       queriedMeetings.push_back(meeting);
     }
@@ -283,10 +291,15 @@ int Storage::deleteMeeting(std::function<bool(const Meeting &meeting)> filter) {
       iterator++;
     }
   }
+  m_dirty = true;
   return count;
 }
 
 /**
 * sync with the file
 */
-bool Storage::sync(void) { return writeToFile(); }
+bool Storage::sync(void) {
+  if (m_dirty)
+    return writeToFile();
+  return true;
+}
